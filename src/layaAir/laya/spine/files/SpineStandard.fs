@@ -4,4 +4,5 @@
 void main(){
     clip();
     gl_FragColor = getColor();
+    setglColor();
 }

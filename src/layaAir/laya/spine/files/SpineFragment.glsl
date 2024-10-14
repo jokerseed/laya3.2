@@ -5,6 +5,23 @@ varying vec2 vUv;
 varying vec4 vColor;
 varying vec2 v_cliped;
 
+#ifdef COLOR_FILTER
+    uniform vec4 u_colorAlpha;
+    uniform mat4 u_colorMat;
+#endif
+
+void setglColor(){
+    #ifdef COLOR_FILTER
+        mat4 alphaMat = u_colorMat;
+
+        alphaMat[0][3] *= gl_FragColor.a;
+        alphaMat[1][3] *= gl_FragColor.a;
+        alphaMat[2][3] *= gl_FragColor.a;
+
+        gl_FragColor = gl_FragColor * alphaMat;
+        gl_FragColor += u_colorAlpha / 255.0 * gl_FragColor.a;
+    #endif
+}
 
 vec3 gammaToLinear(in vec3 value)
 {
@@ -31,17 +48,17 @@ vec4 linearToGamma(in vec4 value)
 
 vec4 getColor(){
     vec4 color = texture2D(u_spineTexture, vUv.xy);//vec4(1.0,0.0,0.0,1.0);
-    #ifndef GAMMATEXTURE
-        //是linear数据
-        #ifdef GAMMASPACE
-            color.xyz = linearToGamma(color.xyz);    
-        #endif
-    #else
-        //gamma数据
-        #ifndef GAMMASPACE
-            color.xyz = gammaToLinear(color.xyz);
-        #endif
-    #endif
+    // #ifndef GAMMATEXTURE
+    //     //是linear数据
+    //     #ifdef GAMMASPACE
+    //         color.xyz = linearToGamma(color.xyz);    
+    //     #endif
+    // #else
+    //     //gamma数据
+    //     #ifndef GAMMASPACE
+    //         color.xyz = gammaToLinear(color.xyz);
+    //     #endif
+    // #endif
      return color*vColor;
 }
 

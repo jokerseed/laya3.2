@@ -7,8 +7,10 @@ import { DrawType } from "../../RenderEngine/RenderEnum/DrawType";
 import { IndexFormat } from "../../RenderEngine/RenderEnum/IndexFormat";
 import { MeshTopology } from "../../RenderEngine/RenderEnum/RenderPologyMode";
 import { Sprite } from "../../display/Sprite";
+import { ColorFilter } from "../../filters/ColorFilter";
 import { LayaGL } from "../../layagl/LayaGL";
 import { Color } from "../../maths/Color";
+import { Matrix4x4 } from "../../maths/Matrix4x4";
 import { Vector2 } from "../../maths/Vector2";
 import { Vector4 } from "../../maths/Vector4";
 import { Material } from "../../resource/Material";
@@ -124,6 +126,8 @@ export class SpineOptimizeRender implements ISpineOptimizeRender {
     bakeData: TSpineBakeData;
 
     private _renderProxytype: ERenderProxyType;
+
+    colorFilter: ColorFilter = null;
 
     /**
      * @en Create a new SpineOptimizeRender instance.
@@ -425,6 +429,7 @@ export class SpineOptimizeRender implements ISpineOptimizeRender {
      * @param time 要渲染动画的时间。
      */
     render(time: number): void {
+        this.renderProxy.colorFilter = this.colorFilter;
         this.renderProxy.render(time, this.boneMat);
     }
 }
@@ -434,6 +439,7 @@ enum ERenderProxyType {
     RenderBake
 }
 interface IRender {
+    colorFilter: ColorFilter;
     change(skinRender: SkinRender, currentAnimation: AnimationRenderProxy): void;
     leave(): void;
     render(curTime: number, boneMat: Float32Array): void;
@@ -466,6 +472,8 @@ class RenderOptimize implements IRender {
      * @zh 当前动画渲染代理。
      */
     currentAnimation: AnimationRenderProxy;
+
+    colorFilter: ColorFilter = null;
 
     /**
      * @en Create a new instance of RenderOptimize.
@@ -514,6 +522,17 @@ class RenderOptimize implements IRender {
         this.currentAnimation.render(this.bones, this.slots, this.skinRender, curTime, boneMat);//TODO bone
         // this.material.boneMat = boneMat;
         this._renderNode._spriteShaderData.setBuffer(SpineShaderInit.BONEMAT, boneMat);
+
+        if (this.colorFilter) {
+            let ft = this.colorFilter;
+            this._renderNode._spriteShaderData.addDefine(SpineShaderInit.SPINE_COLOR_FILTER);
+            Matrix4x4.TEMPMatrix0.cloneByArray(ft._mat);
+            this._renderNode._spriteShaderData.setMatrix4x4(SpineShaderInit.SPINE_COLOR_MAT, Matrix4x4.TEMPMatrix0);
+            Vector4.tempVec4.setValue(ft._alpha[0], ft._alpha[1], ft._alpha[2], ft._alpha[3]);
+            this._renderNode._spriteShaderData.setVector(SpineShaderInit.SPINE_COLOR_ALPHA, Vector4.tempVec4);
+        } else {
+            this._renderNode._spriteShaderData.removeDefine(SpineShaderInit.SPINE_COLOR_FILTER);
+        }
     }
 }
 
@@ -528,6 +547,8 @@ class RenderNormal implements IRender {
     _renerer: ISpineRender;
     /** @internal */
     _skeleton: spine.Skeleton;
+
+    colorFilter: ColorFilter;
 
     /**
      * @en Create a new instance of RenderNormal.
@@ -607,6 +628,9 @@ class RenderBake implements IRender {
      * @zh 动画偏移量映射。
      */
     aniOffsetMap: Record<string, number>;
+
+    colorFilter: ColorFilter;
+
     /**
      * @en Animatioin frame texture.
      * @zh 动画帧贴图。

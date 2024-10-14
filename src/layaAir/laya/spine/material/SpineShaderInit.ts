@@ -165,6 +165,10 @@ export class SpineShaderInit {
      */
     static SPINE_GPU_INSTANCE:ShaderDefine;
 
+    static SPINE_COLOR_FILTER: ShaderDefine;
+    static SPINE_COLOR_ALPHA: number;
+    static SPINE_COLOR_MAT: number;
+
     /**
      * @en TextureSV Mesh Descript.
      * @zh 纹理 Spine 顶点属性描述。
@@ -208,6 +212,13 @@ export class SpineShaderInit {
         SpineShaderInit.SPINE_SIMPLE = Shader3D.getDefineByName("SPINE_SIMPLE");
         SpineShaderInit.SPINE_GPU_INSTANCE = Shader3D.getDefineByName("GPU_INSTANCE");
 
+        SpineShaderInit.SPINE_SIMPLE = Shader3D.getDefineByName("SPINE_SIMPLE");
+        SpineShaderInit.SPINE_GPU_INSTANCE = Shader3D.getDefineByName("GPU_INSTANCE");
+
+        SpineShaderInit.SPINE_COLOR_ALPHA = Shader3D.propertyNameToID("u_colorAlpha");
+        SpineShaderInit.SPINE_COLOR_MAT = Shader3D.propertyNameToID("u_colorMat");
+        SpineShaderInit.SPINE_COLOR_FILTER = Shader3D.getDefineByName("COLOR_FILTER");
+
         const commandUniform = LayaGL.renderDeviceFactory.createGlobalUniformMap("Sprite2D");
         commandUniform.addShaderUniform(SpineShaderInit.BONEMAT, "u_sBone", ShaderDataType.Buffer);
         commandUniform.addShaderUniform(SpineShaderInit.NMatrix, "u_NMatrix", ShaderDataType.Buffer);
@@ -217,6 +228,9 @@ export class SpineShaderInit {
         commandUniform.addShaderUniform(SpineShaderInit.SIMPLE_SIMPLEANIMATORPARAMS, "u_SimpleAnimatorParams", ShaderDataType.Vector4);
         commandUniform.addShaderUniform(SpineShaderInit.SIMPLE_SIMPLEANIMATORTEXTURE, "u_SimpleAnimatorTexture", ShaderDataType.Texture2D);
         commandUniform.addShaderUniform(SpineShaderInit.SIMPLE_SIMPLEANIMATORTEXTURESIZE, "u_SimpleAnimatorTextureSize", ShaderDataType.Float);
+
+        commandUniform.addShaderUniform(SpineShaderInit.SPINE_COLOR_ALPHA, "u_colorAlpha", ShaderDataType.Vector4);
+        commandUniform.addShaderUniform(SpineShaderInit.SPINE_COLOR_MAT, "u_colorMat", ShaderDataType.Matrix4x4);
 
         //commandUniform.addShaderUniform(SpineShaderInit.SpineTexture, "u_spineTexture", ShaderDataType.Texture2D);
         let shader = Shader3D.add("SpineStandard", true, false);
